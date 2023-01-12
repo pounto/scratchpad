@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+
+<!-- Load d3.js -->
+<script src="https://d3js.org/d3.v4.js"></script>
+
+<!-- Create a div where the graph will take place -->
+<div id="my_dataviz" height="auto"></div>
+
+<script>
+
+// set the dimensions and margins of the graph
+var margin = {top: 30, right: 30, bottom: 30, left: 30},
+    width = window.innerWidth - margin.left - margin.right,
+    height = window.innerHeight - margin.top - margin.bottom;
+
+// append the svg object to the body of the page
+var svg = d3.select("#my_dataviz")
+  .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+	.attr("viewBox","0 0 width height")
+	.attr("preserveAspectRatio","xMidYMid meet")
+  .append("g")
+    .attr("transform",
+          "translate(" + margin.left + "," + margin.top + ")");
+
+//Read the data
+d3.csv("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/data_IC.csv",function(data) {
+
+    // Add X axis --> it is a date format
+    var x = d3.scaleLinear()
+      .domain([1,100])
+      .range([ 0, width ]);
+    svg.append("g")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x));
+
+    // Add Y axis
+    var y = d3.scaleLinear()
+      .domain([0, 13])
+      .range([ height, 0 ]);
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    // Show confidence interval
+    svg.append("path")
+      .datum(data)
+      .attr("fill", "#cce5af")
+      .attr("stroke", "none")
+	  .attr("opacity","0.5")
+      .attr("d", d3.area()
+        .x(function(d) { return x(d.x) })
+        .y0(function(d) { return y(-d.CI_right)-200 })
+        .y1(function(d) { return y(-d.CI_left)-200 })
+        )
+		
+		
+    // Add the line
+    svg
+      .append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "red")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.x) })
+        .y(function(d) { return y(-d.y)-200 })
+        )
+		
+		
+		
+	svg.append("path")
+      .datum(data)
+      .attr("fill", "#cce5ff")
+      .attr("stroke", "none")
+      .attr("opacity","0.5")
+      .attr("d", d3.area()
+        .x(function(d) { return x(d.x) })
+        .y0(function(d) { return y(d.CI_right) })
+        .y1(function(d) { return y(d.CI_left) })
+        )
+
+    // Add the line
+    svg
+      .append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("d", d3.line()
+        .x(function(d) { return x(d.x) })
+        .y(function(d) { return y(d.y) })
+        )
+		
+
+
+
+})
+
+</script>
